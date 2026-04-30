@@ -3,28 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Gallery - Pinterest Style</title>
+    <title>MediaHub - Pinterest Style Gallery</title>
     <style>
         :root {
             --primary-color: #E60023; /* Pinterest Red */
             --dark-color: #111;
-            --light-gray: #efefef;
+            --light-gray: #f0f0f0;
+            --card-gray: #e9e9e9;
             --dark-gray: #717171;
             --white: #fff;
-            --border-radius: 16px;
+            --border-radius: 20px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--white);
             color: var(--dark-color);
-            padding-bottom: 50px;
+            padding-bottom: 60px;
         }
 
         /* Navbar */
@@ -32,22 +35,50 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 30px;
+            padding: 18px 40px;
             background-color: var(--white);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
         .logo {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 800;
             color: var(--primary-color);
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: var(--light-gray);
+            padding: 12px 20px;
+            border-radius: 30px;
+            width: 40%;
+            max-width: 500px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--dark-color);
+            background-color: var(--white);
+        }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 15px;
+            margin-left: 10px;
         }
 
         .nav-actions {
@@ -57,13 +88,13 @@
         }
 
         .btn {
-            background-color: var(--light-gray);
-            border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-weight: 700;
+            font-size: 14px;
             border-radius: 24px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: var(--transition);
+            border: none;
         }
 
         .btn-red {
@@ -71,12 +102,9 @@
             color: var(--white);
         }
 
-        .btn:hover {
-            background-color: #d1d1d1;
-        }
-        
         .btn-red:hover {
             background-color: #ad081b;
+            transform: scale(1.02);
         }
 
         .btn-outline {
@@ -94,67 +122,72 @@
         .tabs {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 30px;
             margin: 30px 0;
         }
 
         .tab-btn {
             background: none;
             border: none;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: var(--dark-gray);
             cursor: pointer;
-            padding-bottom: 5px;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s;
+            padding-bottom: 8px;
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
         }
 
         .tab-btn.active, .tab-btn:hover {
             color: var(--dark-color);
-            border-bottom: 2px solid var(--dark-color);
+            border-bottom: 3px solid var(--dark-color);
         }
 
         /* Gallery Grid */
         .gallery-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 30px;
         }
 
         .section-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
             margin-top: 20px;
         }
 
         .card {
-            background-color: var(--light-gray);
+            background-color: var(--card-gray);
             border-radius: var(--border-radius);
             overflow: hidden;
             position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
             display: flex;
             flex-direction: column;
             aspect-ratio: auto;
         }
 
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
 
         .card img, .card video {
             width: 100%;
-            height: 300px;
+            height: 350px;
             object-fit: cover;
             display: block;
+            transition: var(--transition);
+        }
+
+        .card:hover img {
+            transform: scale(1.02);
         }
 
         .card-info {
-            padding: 12px;
+            padding: 15px 18px;
             background: var(--white);
             display: flex;
             justify-content: space-between;
@@ -162,43 +195,43 @@
         }
 
         .card-title {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 60%;
+            max-width: 65%;
         }
 
         .card-actions {
             display: flex;
-            gap: 8px;
+            gap: 12px;
         }
 
         .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--dark-gray);
-            transition: color 0.2s;
+            transition: var(--transition);
         }
 
         .action-btn:hover {
             color: var(--primary-color);
+            transform: scale(1.1);
         }
 
         .delete-btn {
             color: var(--primary-color);
-            display: none; /* Default hidden, visible when owner mode is active */
+            display: none; /* Only shown in Owner Mode */
         }
 
-        /* Hidden Section State */
         .hidden {
             display: none;
         }
 
-        /* Modal / Popup */
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -207,28 +240,36 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
             justify-content: center;
             align-items: center;
         }
 
         .modal-content {
             background-color: var(--white);
-            padding: 30px;
-            border-radius: 24px;
+            padding: 40px;
+            border-radius: 30px;
             width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 480px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
             position: relative;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
+            top: 25px;
+            right: 25px;
+            font-size: 28px;
             cursor: pointer;
             color: var(--dark-gray);
+            transition: var(--transition);
         }
 
         .close-btn:hover {
@@ -236,43 +277,50 @@
         }
 
         .modal-title {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 800;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
+            color: var(--dark-gray);
         }
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 12px;
+            padding: 14px 16px;
+            background-color: var(--light-gray);
+            border: 2px solid transparent;
+            border-radius: 16px;
             font-size: 15px;
+            outline: none;
+            transition: var(--transition);
         }
 
         .form-group input:focus, .form-group select:focus {
-            outline: 2px solid var(--primary-color);
+            border-color: var(--dark-color);
+            background-color: var(--white);
         }
 
         .submit-btn {
             width: 100%;
             background-color: var(--primary-color);
             color: var(--white);
-            padding: 12px;
+            padding: 15px;
             font-weight: 700;
+            font-size: 16px;
             border-radius: 24px;
             border: none;
             cursor: pointer;
+            transition: var(--transition);
             margin-top: 10px;
         }
 
@@ -280,15 +328,26 @@
             background-color: #ad081b;
         }
 
+        /* Mobile Responsive adjustments */
         @media (max-width: 768px) {
             header {
-                padding: 15px 15px;
+                padding: 12px 18px;
+            }
+            .search-box {
+                display: none; /* Hide search on small screen */
+            }
+            .gallery-container {
+                padding: 0 16px;
             }
             .section-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+                gap: 14px;
             }
             .card img, .card video {
-                height: 200px;
+                height: 220px;
+            }
+            .modal-content {
+                padding: 28px 22px;
             }
         }
     </style>
@@ -302,6 +361,12 @@
             </svg>
             <span>MediaHub</span>
         </a>
+
+        <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--dark-gray)"><path d="M21.53 20.47l-4.72-4.72a7.92 7.92 0 10-1.06 1.06l4.72 4.72a.75.75 0 001.06-1.06zM10.5 16A5.5 5.5 0 1116 10.5 5.506 5.506 0 0110.5 16z"></path></svg>
+            <input type="text" id="searchInput" placeholder="Search photos & videos" onkeyup="searchMedia()">
+        </div>
+
         <div class="nav-actions">
             <button class="btn btn-outline" id="ownerLoginBtn" onclick="toggleOwnerMode()">Owner Login</button>
             <button class="btn btn-red" id="openUploadModal">Upload Media</button>
@@ -327,8 +392,8 @@
             <div class="modal-title">Upload New Media</div>
             <form id="mediaForm">
                 <div class="form-group">
-                    <label for="mediaTitle">Title/Description</label>
-                    <input type="text" id="mediaTitle" placeholder="Enter title" required>
+                    <label for="mediaTitle">Title / Caption</label>
+                    <input type="text" id="mediaTitle" placeholder="Enter media title" required>
                 </div>
                 <div class="form-group">
                     <label for="mediaType">Type</label>
@@ -338,7 +403,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="mediaFileInput">Choose File (Gallery/Device)</label>
+                    <label for="mediaFileInput">Choose File</label>
                     <input type="file" id="mediaFileInput" accept="image/*,video/*" required>
                 </div>
                 <button type="submit" class="submit-btn">Add to Gallery</button>
@@ -349,15 +414,21 @@
     <script>
         let isOwner = false;
         
-        // Initial Data - Built-in initial items
-        let photos = [
+        // Load existing data from localStorage or use defaults
+        let photos = JSON.parse(localStorage.getItem('savedPhotos')) || [
             { id: 1, title: "Nature Mountain View", url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800" },
             { id: 2, title: "Beautiful Sunset", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" }
         ];
 
-        let videos = [
+        let videos = JSON.parse(localStorage.getItem('savedVideos')) || [
             { id: 1, title: "Ocean Waves", url: "https://assets.mixkit.co/videos/preview/mixkit-waves-of-the-sea-1175-high.mp4" }
         ];
+
+        // Save data to localStorage
+        function saveToStorage() {
+            localStorage.setItem('savedPhotos', JSON.stringify(photos));
+            localStorage.setItem('savedVideos', JSON.stringify(videos));
+        }
 
         function renderGallery() {
             const photoSection = document.getElementById('photos-section');
@@ -369,7 +440,7 @@
             photos.forEach(item => {
                 photoSection.innerHTML += `
                     <div class="card">
-                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x300?text=File+Not+Found'">
+                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x350?text=File+Not+Found'">
                         <div class="card-info">
                             <span class="card-title">${item.title}</span>
                             <div class="card-actions">
@@ -396,7 +467,6 @@
                 `;
             });
 
-            // Re-apply owner view access
             toggleDeleteButtonsVisibility();
         }
 
@@ -419,26 +489,40 @@
             }
         }
 
-        // Modal Control
+        // Search logic
+        function searchMedia() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            
+            // Search in photos
+            const photoCards = document.querySelectorAll('#photos-section .card');
+            photoCards.forEach(card => {
+                const title = card.querySelector('.card-title').innerText.toLowerCase();
+                card.style.display = title.includes(input) ? "flex" : "none";
+            });
+
+            // Search in videos
+            const videoCards = document.querySelectorAll('#videos-section .card');
+            videoCards.forEach(card => {
+                const title = card.querySelector('.card-title').innerText.toLowerCase();
+                card.style.display = title.includes(input) ? "flex" : "none";
+            });
+        }
+
+        // Modal Controls
         const modal = document.getElementById('uploadModal');
         const openBtn = document.getElementById('openUploadModal');
         const closeBtn = document.getElementById('closeUploadModal');
 
-        openBtn.onclick = function() {
-            modal.style.display = "flex";
-        }
+        openBtn.onclick = () => modal.style.display = "flex";
+        closeBtn.onclick = () => modal.style.display = "none";
 
-        closeBtn.onclick = function() {
-            modal.style.display = "none";
-        }
-
-        window.onclick = function(event) {
+        window.onclick = (event) => {
             if (event.target == modal) {
                 modal.style.display = "none";
             }
         }
 
-        // Add new item to gallery from file input
+        // Upload new item
         document.getElementById('mediaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const title = document.getElementById('mediaTitle').value;
@@ -450,14 +534,14 @@
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
-                    const url = e.target.result; // Data URL for preview and download
+                    const url = e.target.result;
                     if (type === 'photo') {
-                        photos.push({ id: photos.length + 1, title: title, url: url });
+                        photos.push({ id: Date.now(), title: title, url: url });
                     } else {
-                        videos.push({ id: videos.length + 1, title: title, url: url });
+                        videos.push({ id: Date.now(), title: title, url: url });
                     }
 
-                    // Reset form and close modal
+                    saveToStorage();
                     document.getElementById('mediaForm').reset();
                     modal.style.display = "none";
                     renderGallery();
@@ -466,18 +550,18 @@
             }
         });
 
-        // Owner/Admin mode toggle
+        // Owner Authentication Mode
         function toggleOwnerMode() {
             if (!isOwner) {
-                let pass = prompt("Enter owner password/pin (Hint: owner123):");
+                let pass = prompt("Enter Owner Password (Hint: owner123):");
                 if (pass === "owner123") {
                     isOwner = true;
                     alert("Owner mode activated!");
-                    document.getElementById('ownerLoginBtn').innerText = "Owner Mode: ON";
+                    document.getElementById('ownerLoginBtn').innerText = "Owner: ON";
                     document.getElementById('ownerLoginBtn').style.borderColor = "#E60023";
                     document.getElementById('ownerLoginBtn').style.color = "#E60023";
                 } else {
-                    alert("Incorrect password!");
+                    alert("Galat password!");
                 }
             } else {
                 isOwner = false;
@@ -497,18 +581,19 @@
 
         function deleteItem(type, id) {
             if (!isOwner) return;
-            let confirmDelete = confirm("Kya aap ye item delete karna chahte hain?");
+            let confirmDelete = confirm("Kya aap ye item hamesha ke liye delete karna chahte hain?");
             if (confirmDelete) {
                 if (type === 'photo') {
                     photos = photos.filter(item => item.id !== id);
                 } else {
                     videos = videos.filter(item => item.id !== id);
                 }
+                saveToStorage();
                 renderGallery();
             }
         }
 
-        // Initialize gallery on load
+        // Initialize layout on load
         renderGallery();
     </script>
 </body>
