@@ -166,7 +166,6 @@
             transition: var(--transition);
             display: flex;
             flex-direction: column;
-            aspect-ratio: auto;
         }
 
         .card:hover {
@@ -174,9 +173,11 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
         }
 
+        /* 1:1 Aspect Ratio Fixed Frame */
         .card img, .card video {
             width: 100%;
-            height: 350px;
+            height: auto;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
             display: block;
             transition: var(--transition);
@@ -200,12 +201,33 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 65%;
+            max-width: 55%;
         }
 
         .card-actions {
             display: flex;
-            gap: 12px;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Styled Download Button */
+        .download-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--light-gray);
+            color: var(--dark-color);
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .download-btn:hover {
+            background-color: var(--dark-color);
+            color: var(--white);
         }
 
         .action-btn {
@@ -334,7 +356,7 @@
                 padding: 12px 18px;
             }
             .search-box {
-                display: none; /* Hide search on small screen */
+                display: none; /* Hide search on small screens */
             }
             .gallery-container {
                 padding: 0 16px;
@@ -344,10 +366,18 @@
                 gap: 14px;
             }
             .card img, .card video {
-                height: 220px;
+                height: auto;
             }
             .modal-content {
                 padding: 28px 22px;
+            }
+            .card-title {
+                max-width: 45%;
+                font-size: 13px;
+            }
+            .download-btn {
+                padding: 6px 10px;
+                font-size: 11px;
             }
         }
     </style>
@@ -414,7 +444,7 @@
     <script>
         let isOwner = false;
         
-        // Load existing data from localStorage or use defaults
+        // Load data from localStorage or fallback to defaults
         let photos = JSON.parse(localStorage.getItem('savedPhotos')) || [
             { id: 1, title: "Nature Mountain View", url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800" },
             { id: 2, title: "Beautiful Sunset", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" }
@@ -424,7 +454,6 @@
             { id: 1, title: "Ocean Waves", url: "https://assets.mixkit.co/videos/preview/mixkit-waves-of-the-sea-1175-high.mp4" }
         ];
 
-        // Save data to localStorage
         function saveToStorage() {
             localStorage.setItem('savedPhotos', JSON.stringify(photos));
             localStorage.setItem('savedVideos', JSON.stringify(videos));
@@ -440,11 +469,11 @@
             photos.forEach(item => {
                 photoSection.innerHTML += `
                     <div class="card">
-                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x350?text=File+Not+Found'">
+                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/300x300?text=File+Not+Found'">
                         <div class="card-info">
                             <span class="card-title">${item.title}</span>
                             <div class="card-actions">
-                                <a href="${item.url}" download="${item.title}" class="action-btn" title="Download">&#11199;</a>
+                                <a href="${item.url}" download="${item.title}" class="download-btn">⬇️ Download</a>
                                 <button class="action-btn delete-btn" onclick="deleteItem('photo', ${item.id})" title="Delete">&#128465;</button>
                             </div>
                         </div>
@@ -459,7 +488,7 @@
                         <div class="card-info">
                             <span class="card-title">${item.title}</span>
                             <div class="card-actions">
-                                <a href="${item.url}" download="${item.title}" class="action-btn" title="Download">&#11199;</a>
+                                <a href="${item.url}" download="${item.title}" class="download-btn">⬇️ Download</a>
                                 <button class="action-btn delete-btn" onclick="deleteItem('video', ${item.id})" title="Delete">&#128465;</button>
                             </div>
                         </div>
@@ -489,18 +518,16 @@
             }
         }
 
-        // Search logic
+        // Search feature
         function searchMedia() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             
-            // Search in photos
             const photoCards = document.querySelectorAll('#photos-section .card');
             photoCards.forEach(card => {
                 const title = card.querySelector('.card-title').innerText.toLowerCase();
                 card.style.display = title.includes(input) ? "flex" : "none";
             });
 
-            // Search in videos
             const videoCards = document.querySelectorAll('#videos-section .card');
             videoCards.forEach(card => {
                 const title = card.querySelector('.card-title').innerText.toLowerCase();
@@ -522,7 +549,7 @@
             }
         }
 
-        // Upload new item
+        // Upload functionality
         document.getElementById('mediaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const title = document.getElementById('mediaTitle').value;
@@ -550,7 +577,6 @@
             }
         });
 
-        // Owner Authentication Mode
         function toggleOwnerMode() {
             if (!isOwner) {
                 let pass = prompt("Enter Owner Password (Hint: owner123):");
@@ -593,7 +619,7 @@
             }
         }
 
-        // Initialize layout on load
+        // Initialize Layout
         renderGallery();
     </script>
 </body>
