@@ -79,6 +79,17 @@
             background-color: #ad081b;
         }
 
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--dark-gray);
+            color: var(--dark-gray);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light-gray);
+            color: var(--dark-color);
+        }
+
         /* Tabs Section */
         .tabs {
             display: flex;
@@ -156,10 +167,15 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 70%;
+            max-width: 60%;
         }
 
-        .download-btn {
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
@@ -168,8 +184,13 @@
             transition: color 0.2s;
         }
 
-        .download-btn:hover {
+        .action-btn:hover {
             color: var(--primary-color);
+        }
+
+        .delete-btn {
+            color: var(--primary-color);
+            display: none; /* Default hidden, visible when owner mode is active */
         }
 
         /* Hidden Section State */
@@ -282,6 +303,7 @@
             <span>MediaHub</span>
         </a>
         <div class="nav-actions">
+            <button class="btn btn-outline" id="ownerLoginBtn" onclick="toggleOwnerMode()">Owner Login</button>
             <button class="btn btn-red" id="openUploadModal">Upload Media</button>
         </div>
     </header>
@@ -305,8 +327,8 @@
             <div class="modal-title">Upload New Media</div>
             <form id="mediaForm">
                 <div class="form-group">
-                    <label for="mediaTitle">Title</label>
-                    <input type="text" id="mediaTitle" placeholder="Enter title/name" required>
+                    <label for="mediaTitle">Title/Description</label>
+                    <input type="text" id="mediaTitle" placeholder="Enter title" required>
                 </div>
                 <div class="form-group">
                     <label for="mediaType">Type</label>
@@ -316,8 +338,8 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="mediaUrl">Media File URL or Link</label>
-                    <input type="url" id="mediaUrl" placeholder="Enter link (e.g., https://example.com/image.jpg)" required>
+                    <label for="mediaFileInput">Choose File (Gallery/Device)</label>
+                    <input type="file" id="mediaFileInput" accept="image/*,video/*" required>
                 </div>
                 <button type="submit" class="submit-btn">Add to Gallery</button>
             </form>
@@ -325,7 +347,9 @@
     </div>
 
     <script>
-        // Initial Data - Photo and Video arrays for both desktop & mobile
+        let isOwner = false;
+        
+        // Initial Data - Built-in initial items
         let photos = [
             { id: 1, title: "Nature Mountain View", url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800" },
             { id: 2, title: "Beautiful Sunset", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800" }
@@ -345,10 +369,13 @@
             photos.forEach(item => {
                 photoSection.innerHTML += `
                     <div class="card">
-                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x300?text=Image+Not+Found'">
+                        <img src="${item.url}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/250x300?text=File+Not+Found'">
                         <div class="card-info">
                             <span class="card-title">${item.title}</span>
-                            <a href="${item.url}" download="${item.title}.jpg" class="download-btn" title="Download">&#11199;</a>
+                            <div class="card-actions">
+                                <a href="${item.url}" download="${item.title}" class="action-btn" title="Download">&#11199;</a>
+                                <button class="action-btn delete-btn" onclick="deleteItem('photo', ${item.id})" title="Delete">&#128465;</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -360,11 +387,17 @@
                         <video src="${item.url}" controls></video>
                         <div class="card-info">
                             <span class="card-title">${item.title}</span>
-                            <a href="${item.url}" download="${item.title}.mp4" class="download-btn" title="Download">&#11199;</a>
+                            <div class="card-actions">
+                                <a href="${item.url}" download="${item.title}" class="action-btn" title="Download">&#11199;</a>
+                                <button class="action-btn delete-btn" onclick="deleteItem('video', ${item.id})" title="Delete">&#128465;</button>
+                            </div>
                         </div>
                     </div>
                 `;
             });
+
+            // Re-apply owner view access
+            toggleDeleteButtonsVisibility();
         }
 
         function switchTab(tabName) {
@@ -405,24 +438,75 @@
             }
         }
 
-        // Add new item to gallery
+        // Add new item to gallery from file input
         document.getElementById('mediaForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const title = document.getElementById('mediaTitle').value;
             const type = document.getElementById('mediaType').value;
-            const url = document.getElementById('mediaUrl').value;
+            const fileInput = document.getElementById('mediaFileInput');
 
-            if (type === 'photo') {
-                photos.push({ id: photos.length + 1, title: title, url: url });
-            } else {
-                videos.push({ id: videos.length + 1, title: title, url: url });
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    const url = e.target.result; // Data URL for preview and download
+                    if (type === 'photo') {
+                        photos.push({ id: photos.length + 1, title: title, url: url });
+                    } else {
+                        videos.push({ id: videos.length + 1, title: title, url: url });
+                    }
+
+                    // Reset form and close modal
+                    document.getElementById('mediaForm').reset();
+                    modal.style.display = "none";
+                    renderGallery();
+                };
+                reader.readAsDataURL(file);
             }
-
-            // Reset form and close modal
-            document.getElementById('mediaForm').reset();
-            modal.style.display = "none";
-            renderGallery();
         });
+
+        // Owner/Admin mode toggle
+        function toggleOwnerMode() {
+            if (!isOwner) {
+                let pass = prompt("Enter owner password/pin (Hint: owner123):");
+                if (pass === "owner123") {
+                    isOwner = true;
+                    alert("Owner mode activated!");
+                    document.getElementById('ownerLoginBtn').innerText = "Owner Mode: ON";
+                    document.getElementById('ownerLoginBtn').style.borderColor = "#E60023";
+                    document.getElementById('ownerLoginBtn').style.color = "#E60023";
+                } else {
+                    alert("Incorrect password!");
+                }
+            } else {
+                isOwner = false;
+                document.getElementById('ownerLoginBtn').innerText = "Owner Login";
+                document.getElementById('ownerLoginBtn').style.borderColor = "#717171";
+                document.getElementById('ownerLoginBtn').style.color = "#717171";
+            }
+            toggleDeleteButtonsVisibility();
+        }
+
+        function toggleDeleteButtonsVisibility() {
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            deleteBtns.forEach(btn => {
+                btn.style.display = isOwner ? 'block' : 'none';
+            });
+        }
+
+        function deleteItem(type, id) {
+            if (!isOwner) return;
+            let confirmDelete = confirm("Kya aap ye item delete karna chahte hain?");
+            if (confirmDelete) {
+                if (type === 'photo') {
+                    photos = photos.filter(item => item.id !== id);
+                } else {
+                    videos = videos.filter(item => item.id !== id);
+                }
+                renderGallery();
+            }
+        }
 
         // Initialize gallery on load
         renderGallery();
